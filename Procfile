@@ -1,1 +1,1 @@
-getter: go run .\quickstart.go
+getter: go build .\src\quickstart.go
