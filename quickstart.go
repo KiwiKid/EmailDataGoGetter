@@ -151,12 +151,6 @@ func main() {
 		fmt.Println("No labels found.")
 		return
 	}
-	//	fmt.Println("Labels:")
-	//	for _, l := range l.Labels {
-	//		fmt.Printf("- %s %s\n", l.Name, l.Id)
-	//	}
-
-	// labels
 
 	seekLabel, err := FindByName(l.Labels, "Seek")
 	if err != nil {
