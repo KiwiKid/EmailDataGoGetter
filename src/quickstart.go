@@ -166,7 +166,7 @@ func main() {
 		return
 	}
 
-	// TODO: only get todays email
+	// TODO: only get emails from the last 24 hours
 	allContent := make([]*gmail.Message, len(e.Messages))
 	for i, mess := range e.Messages {
 		c, err := srv.Users.Messages.Get(user, mess.Id).Do()
