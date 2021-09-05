@@ -1,1 +1,1 @@
-getter: go .DataCollector\quickstart.go
+getter: go run .\quickstart.go
