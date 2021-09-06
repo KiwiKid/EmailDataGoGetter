@@ -127,7 +127,12 @@ func main() {
 	ctx := context.Background()
 	b, err := ioutil.ReadFile("credentials.json")
 	if err != nil {
-		log.Fatalf("Unable to read client secret file: %v", err)
+		envCred := os.Getenv("GMAIL_CREDENTIALS_JSON")
+		if len(envCred) == 0 {
+			log.Fatalf("Unable to read client secret file or GMAIL_CREDENTIALS_JSON env variable : %v", err)
+		}
+
+		b = []byte(envCred)
 	}
 
 	// If modifying these scopes, delete your previously saved token.json.
