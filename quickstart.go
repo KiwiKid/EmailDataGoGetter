@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"database/sql"
 	"encoding/base64"
 	"encoding/json"
 	"errors"
@@ -118,6 +119,7 @@ type LookupSet struct {
 }
 
 type Lookup struct {
+	LookupName string
 	DataRegex  string
 	LabelRegex string
 }
@@ -201,6 +203,7 @@ func main() {
 			GmailLabel: "Seek",
 			Lookups: []Lookup{
 				{
+					LookupName: `job count`,
 					DataRegex:  `ve found <b>\s*(\d+)\s*</b>`,
 					LabelRegex: `<b>software in (.+)</b> posted a short while`,
 				},
@@ -235,6 +238,16 @@ func main() {
 	}
 	for _, l := range lookupResults {
 		fmt.Printf("%s: %s\n", l.Label, l.Data)
+	}
+
+	db, err := sql.Open("postgres", os.Getenv("DATABASE_URL"))
+	if err != nil {
+		log.Fatalf("Error opening database: %q", err)
+	}
+
+	if _, err := db.Exec("CREATE TABLE IF NOT EXISTS EmailData (GmailLabel VARCHAR (100) NULL,  label VARCHAR (500) NULL, data VARCHAR (500)  NULL)"); err != nil {
+		log.Fatalf("Error creating database table: %q", err)
+		return
 	}
 
 }
