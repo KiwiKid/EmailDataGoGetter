@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"database/sql"
 	"encoding/base64"
 	"encoding/json"
 	"errors"
@@ -13,6 +12,8 @@ import (
 	"os"
 	"regexp"
 	"strings"
+
+	"github.com/jackc/pgx/v4"
 
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/google"
@@ -212,6 +213,7 @@ func main() {
 
 		// MAYBEDO: Don't parse the whole html here, just the section we need.
 		// (pro - quicker parsing? con - makes find data logic more complex)
+		// TODO: Could do a smart xpath selection with a chrome extention?
 		for _, lookup := range allLookups.Lookups {
 
 			// Find number:
@@ -240,14 +242,23 @@ func main() {
 		fmt.Printf("%s: %s\n", l.Label, l.Data)
 	}
 
-	db, err := sql.Open("postgres", os.Getenv("DATABASE_URL"))
+	conn, err := pgx.Connect(context.Background(), os.Getenv("DATABASE_URL"))
 	if err != nil {
-		log.Fatalf("Error opening database: %q", err)
+		fmt.Fprintf(os.Stderr, "Unable to connect to database: %v\n", err)
+		os.Exit(1)
 	}
+	defer conn.Close(context.Background())
 
-	if _, err := db.Exec("CREATE TABLE IF NOT EXISTS EmailData (GmailLabel VARCHAR (100) NULL,  label VARCHAR (500) NULL, data VARCHAR (500)  NULL)"); err != nil {
-		log.Fatalf("Error creating database table: %q", err)
-		return
+	var greeting string
+	err = conn.QueryRow(context.Background(), "select 'Hello, world!'").Scan(&greeting)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "QueryRow failed: %v\n", err)
+		os.Exit(1)
 	}
-
+	/*
+		if _, err := db.Exec("CREATE TABLE IF NOT EXISTS EmailData (GmailLabel VARCHAR (100) NULL,  label VARCHAR (500) NULL, data VARCHAR (500)  NULL)"); err != nil {
+			log.Fatalf("Error creating database table: %q", err)
+			return
+		}
+	*/
 }
